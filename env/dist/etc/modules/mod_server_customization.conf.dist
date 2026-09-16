@@ -1,0 +1,36 @@
+###################################################################################################
+# mod-server-customization
+###################################################################################################
+
+# STARTER
+ServerCustomization.Starter.Enable = 1
+ServerCustomization.Starter.GiveRiding = 1
+ServerCustomization.Starter.GiveRacialMount = 1
+
+# 100 copper = 1 silver
+ServerCustomization.Starter.MoneyCopper = 100
+
+ServerCustomization.Starter.MountActionBar.Enable = 1
+# 0..11 ; 11 = dernière case de la première barre
+ServerCustomization.Starter.MountActionBar.PreferredSlot = 11
+
+# Montures raciales 60%
+ServerCustomization.Starter.Mount.Human = 458
+ServerCustomization.Starter.Mount.Orc = 6654
+ServerCustomization.Starter.Mount.Dwarf = 6899
+ServerCustomization.Starter.Mount.NightElf = 10789
+ServerCustomization.Starter.Mount.Undead = 17464
+ServerCustomization.Starter.Mount.Tauren = 18990
+ServerCustomization.Starter.Mount.Gnome = 17453
+ServerCustomization.Starter.Mount.Troll = 10796
+ServerCustomization.Starter.Mount.BloodElf = 35018
+ServerCustomization.Starter.Mount.Draenei = 34406
+
+###################################################################################################
+# FUTURE SECTIONS
+# ServerCustomization.Welcome.*
+# ServerCustomization.QoL.*
+# ServerCustomization.Commands.*
+# ServerCustomization.Progression.*
+# ServerCustomization.Loot.*
+###################################################################################################

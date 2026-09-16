@@ -1,0 +1,202 @@
+###################################################################################################
+# mod-server-customization
+###################################################################################################
+
+# STARTER
+ServerCustomization.Starter.Enable = 1
+ServerCustomization.Starter.GiveRiding = 1
+ServerCustomization.Starter.GiveRacialMount = 1
+
+# 100 copper = 1 silver
+ServerCustomization.Starter.MoneyCopper = 100
+
+# Show a confirmation message when the starter package is granted.
+ServerCustomization.Starter.AnnounceGrant = 1
+
+ServerCustomization.Starter.MountActionBar.Enable = 1
+# 0..11 ; 11 = dernière case de la première barre
+ServerCustomization.Starter.MountActionBar.PreferredSlot = 11
+
+# Montures raciales 60%
+ServerCustomization.Starter.Mount.Human = 458
+ServerCustomization.Starter.Mount.Orc = 6654
+ServerCustomization.Starter.Mount.Dwarf = 6899
+ServerCustomization.Starter.Mount.NightElf = 10789
+ServerCustomization.Starter.Mount.Undead = 17464
+ServerCustomization.Starter.Mount.Tauren = 18990
+ServerCustomization.Starter.Mount.Gnome = 17453
+ServerCustomization.Starter.Mount.Troll = 10796
+ServerCustomization.Starter.Mount.BloodElf = 35018
+ServerCustomization.Starter.Mount.Draenei = 34406
+
+###################################################################################################
+# FUTURE SECTIONS
+# ServerCustomization.Welcome.*
+# ServerCustomization.QoL.*
+# ServerCustomization.Commands.*
+# ServerCustomization.Progression.*
+# ServerCustomization.Loot.*
+###################################################################################################
+
+
+###################################################################################################
+# GATHER-ONLY PLAYER COMMANDS
+#
+# Requires the companion Playerbots patch:
+#   apply-playerbots-gather-only.ps1
+#
+# Commands exposed to normal players:
+#   .mine        = roam the current zone and mine Mining nodes only
+#   .herb        = roam the current zone and gather Herbalism nodes only
+#   .gather      = roam and use any gathering profession the character knows
+#   .autostatus  = show the active gather-only mode
+#   .autostop    = stop automation and fully detach the selfbot AI
+#   .bothelp     = in-game help
+#
+# Combat rule while .mine/.herb/.gather is active:
+# nearby mobs are NOT voluntarily selected. As soon as Playerbots reports an attacker/combat,
+# directed travel is cancelled, combat takes priority, then the same gather target resumes.
+#
+# Quest/grind automation is intentionally NOT exposed by this module.
+###################################################################################################
+
+###################################################################################################
+# DIRECTED GATHER ROUTING
+#
+# .mine / .herb / .gather do NOT use New RPG random wandering.
+# The module scans real GameObject spawn data on the current map, keeps only active/available
+# resource nodes that the character has enough skill to gather, then compares real navmesh routes.
+# It approaches the resource from a nearby walkable point instead of aiming at the object's exact
+# centre. Playerbots handles the final gathering interaction.
+###################################################################################################
+
+ServerCustomization.GatherRoute.Enable = 1
+
+# Keep gathering targets inside the zone in which the command was started/currently runs.
+ServerCustomization.GatherRoute.SameZoneOnly = 1
+
+# Maximum straight-line discovery radius, in game yards, around the player's CURRENT position.
+# After a node is gathered the search is repeated from the character's new position, so the route
+# can naturally progress through the zone without a separate segment-distance setting.
+ServerCustomization.GatherRoute.SearchRadius = 250
+
+# How often the routing controller re-checks target state / chooses a new target.
+ServerCustomization.GatherRoute.UpdateIntervalMs = 1500
+
+# First keep the closest N resource nodes by straight-line distance. For each of those nodes,
+# the module tests 8 approach points around the resource with PathGenerator, then selects the node
+# whose BEST approach point has the shortest real navmesh path.
+ServerCustomization.GatherRoute.PathCandidates = 12
+
+# Radius (yards) of the 8-point approach ring around a resource. Routing stops interfering when
+# the character is close enough for native Playerbots gather/loot to finish the interaction.
+ServerCustomization.GatherRoute.ApproachDistance = 3.5
+
+# Give up on one target after this long and temporarily blacklist it (milliseconds).
+ServerCustomization.GatherRoute.TargetTimeoutMs = 120000
+ServerCustomization.GatherRoute.BlacklistMs = 45000
+
+
+# Mount-aware travel for directed gathering.
+# Playerbots' native "mount" strategy is enabled while gathering. For long legs, routing briefly
+# waits for Playerbots to cast a known mount before starting MotionMaster movement.
+ServerCustomization.GatherRoute.Mount.Enable = 1
+
+# Try to mount when the selected resource is at least this many yards away.
+ServerCustomization.GatherRoute.Mount.MinDistance = 45
+
+# How long to give Playerbots' native mount action to cast before movement starts anyway.
+# Prevents characters with a temporarily unusable mount from getting stuck.
+ServerCustomization.GatherRoute.Mount.WaitMs = 2500
+
+# Dismount when this close to the actual resource so native gather/loot can interact cleanly.
+ServerCustomization.GatherRoute.Mount.DismountDistance = 7
+
+# When mounted during directed gathering, a simple aggro does not interrupt travel until
+# actual incoming damage is observed. Hard control or being dismounted still yields to combat.
+ServerCustomization.GatherRoute.Mount.IgnoreAggroUntilDamage = 1
+
+# After incoming damage, keep combat priority for at least this long after the last hit.
+ServerCustomization.GatherRoute.Mount.DamageCombatHoldMs = 3000
+
+# Aggro/combat handling:
+# attacker detection is evaluated before GatherRoute.UpdateIntervalMs. The directed MovePoint is
+# cancelled once as soon as an attacker/combat state is seen; native Playerbots combat movement
+# then takes control. The current resource target is kept and automatically resumed after combat.
+
+###################################################################################################
+# PLAYER COMMANDS (current)
+#   .mine        = direct route to active Mining nodes in the current zone
+#   .herb        = direct route to active Herbalism nodes in the current zone
+#   .gather      = direct route to both Mining + Herbalism nodes the player can gather
+#   .grind       = native nearby grind, equivalent to the old .grindhere behaviour
+#   .damagedebug on|off|status = trace incoming damage in chat + worldserver logs
+#   .autostatus  / .as
+#   .autostop    / .astop
+#   .bothelp     / .autohelp / .bh
+#
+# Removed legacy commands:
+#   .grindhere .gh .grindzone .gz .gatherzone .gg .minezone .mz .herbzone .hz
+###################################################################################################
+
+
+
+
+# -----------------------------------------------------------------------------
+# Cliff-aware gather approach / stuck detection
+# -----------------------------------------------------------------------------
+# Number of concentric approach rings and angular samples tested around each node.
+# Every candidate is snapped to terrain and rejected unless its FINAL 3-D distance
+# to the resource is within InteractionDistance.
+ServerCustomization.GatherRoute.ApproachRings = 3
+ServerCustomization.GatherRoute.ApproachPointsPerRing = 12
+ServerCustomization.GatherRoute.InteractionDistance = 3.25
+
+# Near the final approach, abandon and temporarily blacklist a target if repeated
+# route updates make no meaningful progress. This prevents permanent mount/path loops.
+ServerCustomization.GatherRoute.Stuck.Enable = 1
+ServerCustomization.GatherRoute.Stuck.NearDistance = 20
+ServerCustomization.GatherRoute.Stuck.MinProgress = 0.75
+ServerCustomization.GatherRoute.Stuck.MaxChecks = 5
+ServerCustomization.GatherRoute.Stuck.BlacklistMs = 90000
+
+# Once the bot is close to its chosen approach point, native Playerbots mount logic
+# is temporarily suppressed so it cannot remount repeatedly under the node.
+ServerCustomization.GatherRoute.Mount.SuppressNearTargetDistance = 12
+
+# -----------------------------------------------------------------------------
+# Route avoidance (directed gather + .grindtarget)
+# -----------------------------------------------------------------------------
+# Adds a risk penalty when a candidate navmesh path enters the aggro radius of
+# unrelated hostile creatures. This does not rewrite AzerothCore's navmesh; it
+# makes the automation prefer a safer target/path when one is available.
+ServerCustomization.RouteAvoidance.Enable = 1
+
+# Extra safety margin added around the creature's calculated aggro radius.
+ServerCustomization.RouteAvoidance.Buffer = 8
+
+# Equivalent "yards of route cost" added for each dangerous crossing.
+# Higher = stronger preference for safe routes, even when they are longer.
+ServerCustomization.RouteAvoidance.Weight = 60
+
+# Extra multiplier for elites/world bosses.
+ServerCustomization.RouteAvoidance.EliteMultiplier = 2.5
+
+
+# -----------------------------------------------------------------------------
+# Automation recovery / fall safety
+# -----------------------------------------------------------------------------
+# When a bot drops below a Start threshold outside combat, custom automation stops
+# selecting/moving to new objectives until BOTH applicable Resume thresholds are met.
+# Native Playerbots remains responsible for eating/drinking.
+ServerCustomization.Automation.Rest.Enable = 1
+ServerCustomization.Automation.Rest.HealthStartPct = 55
+ServerCustomization.Automation.Rest.HealthResumePct = 90
+ServerCustomization.Automation.Rest.ManaStartPct = 35
+ServerCustomization.Automation.Rest.ManaResumePct = 85
+
+# Safety workaround for delayed fall damage generated by automated movement.
+# Only source-less damage during or shortly after a detected falling state is cancelled,
+# and only while one of our automation modes is active.
+ServerCustomization.Automation.DisableFallDamage = 1
+ServerCustomization.Automation.FallDamageGraceMs = 5000

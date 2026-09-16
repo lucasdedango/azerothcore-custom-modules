@@ -1,0 +1,46 @@
+# Dynamic Difficulty
+# .gamedifficulty 0..100 interpolates every Min/Max pair.
+# With multiple real players, the highest difficulty wins.
+# "WithBots" = at least one online PlayerBot in the victim's group.
+
+DynamicDifficulty.Enable = 1
+DynamicDifficulty.DefaultDifficulty = 0
+DynamicDifficulty.AnnounceOnLogin = 1
+DynamicDifficulty.FinalMultiplierCap = 10.0
+
+DynamicDifficulty.Outdoor.WithBots.Damage.Min = 1.40
+DynamicDifficulty.Outdoor.WithBots.Damage.Max = 2.00
+DynamicDifficulty.Outdoor.WithBots.SpellDamage.Min = 1.40
+DynamicDifficulty.Outdoor.WithBots.SpellDamage.Max = 2.00
+
+DynamicDifficulty.Outdoor.WithoutBots.Damage.Min = 1.00
+DynamicDifficulty.Outdoor.WithoutBots.Damage.Max = 1.30
+DynamicDifficulty.Outdoor.WithoutBots.SpellDamage.Min = 1.00
+DynamicDifficulty.Outdoor.WithoutBots.SpellDamage.Max = 1.30
+
+DynamicDifficulty.Dungeon.WithBots.Damage.Min = 1.20
+DynamicDifficulty.Dungeon.WithBots.Damage.Max = 1.70
+DynamicDifficulty.Dungeon.WithBots.SpellDamage.Min = 1.20
+DynamicDifficulty.Dungeon.WithBots.SpellDamage.Max = 1.70
+
+DynamicDifficulty.Dungeon.WithoutBots.Damage.Min = 1.00
+DynamicDifficulty.Dungeon.WithoutBots.Damage.Max = 1.20
+DynamicDifficulty.Dungeon.WithoutBots.SpellDamage.Min = 1.00
+DynamicDifficulty.Dungeon.WithoutBots.SpellDamage.Max = 1.20
+
+DynamicDifficulty.Raid.WithBots.Damage.Min = 1.10
+DynamicDifficulty.Raid.WithBots.Damage.Max = 1.50
+DynamicDifficulty.Raid.WithBots.SpellDamage.Min = 1.10
+DynamicDifficulty.Raid.WithBots.SpellDamage.Max = 1.50
+
+DynamicDifficulty.Raid.WithoutBots.Damage.Min = 1.00
+DynamicDifficulty.Raid.WithoutBots.Damage.Max = 1.15
+DynamicDifficulty.Raid.WithoutBots.SpellDamage.Min = 1.00
+DynamicDifficulty.Raid.WithoutBots.SpellDamage.Max = 1.15
+
+# Optional extra multiplier by creature rank. 1.0 = disabled.
+DynamicDifficulty.CreatureRank.Normal = 1.00
+DynamicDifficulty.CreatureRank.Elite = 1.00
+DynamicDifficulty.CreatureRank.RareElite = 1.00
+DynamicDifficulty.CreatureRank.WorldBoss = 1.00
+DynamicDifficulty.CreatureRank.Rare = 1.00

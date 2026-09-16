@@ -1,0 +1,9 @@
+#
+# mod-mount-chest
+#
+# 20.0 = one chest on average every 5 creature kills.
+#
+
+MountChest.Enable = 1
+MountChest.ChancePercent = 20.0
+MountChest.LifetimeSeconds = 120

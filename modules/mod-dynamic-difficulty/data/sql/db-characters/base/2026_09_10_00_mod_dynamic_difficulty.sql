@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS `mod_dynamic_difficulty` (
+  `guid` INT UNSIGNED NOT NULL,
+  `difficulty` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

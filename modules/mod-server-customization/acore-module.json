@@ -1,0 +1,7 @@
+{
+  "name": "mod-server-customization",
+  "version": "2.3.0",
+  "description": "Directed gather/grind automation with multi-ring cliff-aware mineable approaches, stuck blacklisting, mount-loop suppression, optional no-mob-loot gather mode, route avoidance, recovery and fall safety.",
+  "author": "OpenAI / Lucas",
+  "license": "MIT"
+}

@@ -1,0 +1,5 @@
+{
+  "name": "mod-dynamic-difficulty",
+  "version": "1.3.0-finaldamage",
+  "description": "Dynamic difficulty using AzerothCore UnitScript::DealDamage final damage hook."
+}

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AzerothCore — Commandes joueur</title>
+<style>
+:root{
+  --bg:#0f141a; --panel:#171e27; --panel2:#111820; --text:#e8edf2; --muted:#9aa9b8;
+  --gold:#d7b35a; --blue:#5aa7ff; --green:#68d391; --red:#ff7b7b; --border:#2a3644;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#0a0e13,#111821 40%,#0d131a);color:var(--text);line-height:1.5}
+.wrap{max-width:1100px;margin:auto;padding:28px 18px 60px}
+.hero{border:1px solid var(--border);background:linear-gradient(145deg,#18212c,#10161e);border-radius:18px;padding:26px;box-shadow:0 14px 40px #0007}
+h1{margin:0 0 6px;font-size:34px;color:#f3d98b}
+.hero p{margin:0;color:var(--muted)}
+.search{margin-top:18px;width:100%;padding:13px 14px;border-radius:10px;border:1px solid var(--border);background:#0d131a;color:white;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px;margin-top:18px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 8px 24px #0004}
+.head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.head h2{margin:0;font-size:20px;color:#f5dc98}
+.badge{font-size:12px;padding:4px 8px;border-radius:999px;background:#223044;color:#bcd7ff}
+.body{padding:10px 18px 16px}
+.cmd{padding:12px 0;border-bottom:1px solid #24303c}
+.cmd:last-child{border-bottom:0}
+code{display:inline-block;background:#0b1117;border:1px solid #293746;padding:4px 7px;border-radius:7px;color:#9fd0ff;font-family:Consolas,monospace;font-size:14px}
+.desc{display:block;color:var(--muted);font-size:13px;margin-top:5px}
+.note{margin-top:18px;background:#121a23;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:12px;padding:14px 16px;color:#cdd7e0}
+.small{font-size:12px;color:#7f8d9a;margin-top:18px}
+.hidden{display:none!important}
+.k{color:#77d69b}.b{color:#69aefe}.g{color:#e2bd60}.r{color:#ff8d8d}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <h1>AzerothCore — Commandes joueur</h1>
+    <p>Cheat sheet des modules utilisés / créés sur le serveur Playerbots.</p>
+    <input id="q" class="search" type="search" placeholder="Rechercher une commande… ex : loot, bot, difficulté, xp">
+  </section>
+
+  <div class="grid">
+
+    <section class="card">
+      <div class="head"><h2>🤖 Playerbots</h2><span class="badge">mod-playerbots</span></div>
+      <div class="body">
+        <div class="cmd"><code>.playerbots bot</code><span class="desc">Commande principale de gestion de tes bots personnels.</span></div>
+        <div class="cmd"><code>.playerbots bot add NomDuBot</code><span class="desc">Connecte / ajoute un personnage bot précis.</span></div>
+        <div class="cmd"><code>.playerbots bot remove NomDuBot</code><span class="desc">Retire / déconnecte un bot précis.</span></div>
+        <div class="cmd"><code>.playerbots bot list</code><span class="desc">Affiche les bots disponibles / gérés.</span></div>
+
+        <div class="cmd"><code>.playerbots bot addclass warrior</code><span class="desc"><span class="k">Crée rapidement un nouveau bot</span> de la classe indiquée. Remplace <b>warrior</b> par paladin, hunter, rogue, priest, shaman, mage, warlock, druid ou dk.</span></div>
+        <div class="cmd"><code>.playerbots bot addclass mage female</code><span class="desc">Même commande avec sexe imposé. Valeurs acceptées : <b>male</b>, <b>female</b>, <b>0</b> ou <b>1</b>.</span></div>
+
+        <div class="cmd"><code>.playerbots bot add *</code><span class="desc">Peut agir sur les membres bots du groupe selon le sous-commande utilisé.</span></div>
+        <div class="cmd"><code>.playerbots account linkedAccounts</code><span class="desc">Affiche les comptes Playerbot liés.</span></div>
+        <div class="cmd"><code>.playerbots account link Compte Clé</code><span class="desc">Lie un autre compte Playerbot avec sa clé de sécurité.</span></div>
+        <div class="cmd"><code>.playerbots account unlink Compte</code><span class="desc">Délie un compte Playerbot.</span></div>
+        <div class="cmd"><code>.playerbots account setKey Clé</code><span class="desc">Définit la clé de sécurité utilisée pour les liaisons de comptes.</span></div>
+        <div class="cmd"><code>.playerbots rndbot …</code><span class="desc"><span class="r">GM uniquement.</span> Gestion des random bots globaux.</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>🤖 Automatisation perso</h2><span class="badge">mod-server-customization v2.1</span></div>
+      <div class="body">
+        <div class="cmd"><code>.bothelp</code><span class="desc">Affiche l’aide intégrée. Alias : <code>.autohelp</code> / <code>.bh</code>.</span></div>
+        <div class="cmd"><code>.mine</code><span class="desc">Cherche un vrai filon actif et atteignable dans la zone, puis pathfind directement vers lui.</span></div>
+        <div class="cmd"><code>.herb</code><span class="desc">Même fonctionnement pour les plantes d’Herbalism.</span></div>
+        <div class="cmd"><code>.gather</code><span class="desc">Récolte dirigée mixte Mining + Herbalism selon les métiers et le skill du personnage.</span></div>
+        <div class="cmd"><code>.grind</code><span class="desc">Grind normal des mobs adaptés autour de la position actuelle.</span></div>\n        <div class="cmd"><code>.grindtarget</code><span class="desc">Avec un mob ciblé, mémorise son entry et ne choisit volontairement que ce type de créature pour le grind. Les vrais attackers restent prioritaires.</span></div>
+        <div class="cmd"><code>.damagedebug on</code><span class="desc">Active le diagnostic des dégâts entrants dans le chat et les logs du worldserver.</span></div>
+        <div class="cmd"><code>.damagedebug status</code><span class="desc">Affiche si le diagnostic des dégâts est actif.</span></div>
+        <div class="cmd"><code>.damagedebug off</code><span class="desc">Désactive le diagnostic.</span></div>
+        <div class="cmd"><code>.autostatus</code> / <code>.as</code><span class="desc">Affiche le mode d’automatisation actif et la cible de récolte.</span></div>
+        <div class="cmd"><code>.autostop</code> / <code>.astop</code><span class="desc">Stoppe l’automatisation et détache complètement le selfbot.</span></div>
+
+        <div class="note">
+          <b>Récolte dirigée :</b> plus de <i>wander random</i>. Le module cible les coordonnées réelles des minerais/plantes actifs, filtre par zone, métier, skill, respawn/pool/phase et valide le chemin.
+          <br><br>
+          <b>Recherche :</b> <code>SearchRadius = 250</code> est l’unique rayon et il est recalculé autour de la position actuelle du personnage après chaque récolte. Il n’y a plus de <code>MaxSegmentDistance</code>.
+          <br><br>
+          <b>Combat pendant la récolte :</b> à pied, l’aggro stoppe immédiatement la route. En monture, une simple aggro est ignorée tant qu’aucun dégât n’est reçu ; dégâts, contrôle ou démontage donnent immédiatement la priorité au combat. La même cible de récolte est ensuite reprise si elle est toujours valide.<br><br><br><br><b>Évitement des mobs :</b> les routes de récolte et la sélection de cible de <code>.grindtarget</code> ajoutent une pénalité aux chemins qui traversent la zone d’aggro de mobs non pertinents. Niveau élevé et élites coûtent davantage ; la cible voulue de <code>.grindtarget</code> n’est pas pénalisée.<br><br><b>Monture pendant la récolte :</b> pour les trajets d’au moins 45 yards, la stratégie native <code>mount</code> de Playerbots est activée. Le bot attend brièvement le cast de monture puis démarre quand même si le montage échoue ; il démonte vers 10 yards de la ressource.
+          <br><br>
+          <b>Damage debug :</b> affiche le montant, la source, son entry/niveau, les PV avant impact et <b>LETHAL</b> si le coup suffit à tuer. Pour les dégâts de sort/périodiques, le nom et l’ID du sort sont également affichés quand AzerothCore les fournit.
+          <br><br>
+          <b>Anciennes commandes supprimées :</b> <code>.grindhere</code>, <code>.gh</code>, <code>.grindzone</code>, <code>.gz</code>, <code>.gatherzone</code>, <code>.gg</code>, <code>.minezone</code>, <code>.mz</code>, <code>.herbzone</code>, <code>.hz</code>.
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>⚔️ Difficulté dynamique</h2><span class="badge">mod-dynamic-difficulty</span></div>
+      <div class="body">
+        <div class="cmd"><code>.gamedifficulty</code><span class="desc">Affiche ta difficulté personnelle, la difficulté effective du groupe, le contexte et les multiplicateurs.</span></div>
+        <div class="cmd"><code>.gamedifficulty 0</code><span class="desc">Positionne le curseur au minimum de chaque plage configurée.</span></div>
+        <div class="cmd"><code>.gamedifficulty 50</code><span class="desc">Positionne le curseur à 50 % entre Min et Max.</span></div>
+        <div class="cmd"><code>.gamedifficulty 100</code><span class="desc">Positionne le curseur au maximum de chaque plage configurée.</span></div>
+        <div class="cmd"><code>.gamedifficulty reset</code><span class="desc">Revient à la valeur par défaut configurée.</span></div>
+        <div class="cmd"><code>.gamedifficulty status</code><span class="desc">Alias pour afficher le statut.</span></div>
+        <div class="cmd"><code>.gamedifficulty view</code><span class="desc">Alias pour afficher le statut.</span></div>
+        <div class="note">La valeur est sauvegardée <b>par personnage en SQL</b>. Avec plusieurs vrais joueurs groupés, la valeur la plus haute est utilisée. Les bots ne définissent pas eux-mêmes la difficulté.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>🎁 Loot personnalisé</h2><span class="badge">mod-solo-loot-reroll</span></div>
+      <div class="body">
+        <div class="cmd"><code>.lootignore on</code><span class="desc">Ton personnage est ignoré comme cible du reroll de loot.</span></div>
+        <div class="cmd"><code>.lootignore off</code><span class="desc">Réactive le reroll pour ton personnage.</span></div>
+        <div class="cmd"><code>.lootignore</code><span class="desc">Affiche l’état actuel de l’option.</span></div>
+        <div class="cmd"><code>.loottypeset …</code><span class="desc">Configure / force le type d’équipement recherché par le reroll selon les alias prévus par le module.</span></div>
+        <div class="cmd"><code>.subundo</code><span class="desc">Annule la dernière substitution de loot mémorisée lorsqu’elle est encore récupérable.</span></div>
+        <div class="note">Le module choisit seulement les <b>vrais joueurs</b> comme bénéficiaires du reroll. Les Playerbots ne deviennent pas cible de substitution.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>🧹 AOE Loot</h2><span class="badge">mod-aoe-loot</span></div>
+      <div class="body">
+        <div class="cmd"><code>.aoeloot on</code><span class="desc">Active le loot de zone pour ton personnage.</span></div>
+        <div class="cmd"><code>.aoeloot off</code><span class="desc">Désactive le loot de zone pour ton personnage.</span></div>
+        <div class="cmd"><code>.aoeloot</code><span class="desc">Affiche / utilise la commande principale selon la version du module.</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>📈 XP individuelle</h2><span class="badge">mod-individual-xp</span></div>
+      <div class="body">
+        <div class="cmd"><code>.xp view</code><span class="desc">Affiche ton multiplicateur d’XP actuel.</span></div>
+        <div class="cmd"><code>.xp set X</code><span class="desc">Définit ton multiplicateur d’XP individuel.</span></div>
+        <div class="cmd"><code>.xp default</code><span class="desc">Revient au multiplicateur par défaut.</span></div>
+        <div class="cmd"><code>.xp enable</code><span class="desc">Réactive le gain d’XP individuel.</span></div>
+        <div class="cmd"><code>.xp disable</code><span class="desc">Désactive le gain d’XP pour ton personnage.</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>⚖️ AutoBalance</h2><span class="badge">mod-autobalance</span></div>
+      <div class="body">
+        <div class="cmd"><code>.ab mapstat</code><span class="desc">Affiche les informations AutoBalance de la map / instance actuelle.</span></div>
+        <div class="cmd"><code>.ab creaturestat</code><span class="desc">Affiche les statistiques AutoBalance d’une créature ciblée.</span></div>
+        <div class="cmd"><code>.ab setoffset N</code><span class="desc">Définit l’offset de joueurs simulés utilisé par AutoBalance.</span></div>
+        <div class="cmd"><code>.ab getoffset</code><span class="desc">Affiche l’offset actuel.</span></div>
+        <div class="cmd"><code>.reload config</code><span class="desc">Recharge les fichiers de configuration du serveur. Commande nécessitant les droits adéquats.</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>🪙 Mount Chest</h2><span class="badge">mod-mount-chest</span></div>
+      <div class="body">
+        <div class="cmd"><code>Aucune commande joueur</code><span class="desc">Le module fonctionne automatiquement selon sa configuration : chance de coffre, argent, montures, propriétaire, durée de vie, etc.</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>🧭 Individual Progression</h2><span class="badge">mod-individual-progression</span></div>
+      <div class="body">
+        <div class="cmd"><code>Pas de commande joueur principale utilisée ici</code><span class="desc">Dans notre setup, ce module sert surtout aux règles de progression, aux limites de niveau et aux ajustements Vanilla/TBC/WotLK via configuration.</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2>💰 Drop rates</h2><span class="badge">AzerothCore natif</span></div>
+      <div class="body">
+        <div class="cmd"><code>Rate.Drop.Item.Uncommon = 7</code><span class="desc"><span class="k">Objets verts</span> : chance de drop multipliée par ×5.</span></div>
+        <div class="cmd"><code>Rate.Drop.Item.Rare = 7</code><span class="desc"><span class="b">Objets bleus</span> : chance de drop multipliée par ×5.</span></div>
+        <div class="cmd"><code>AC_RATE_DROP_ITEM_UNCOMMON: "7"</code><span class="desc">Variable Docker utilisée dans ton override.</span></div>
+        <div class="cmd"><code>AC_RATE_DROP_ITEM_RARE: "7"</code><span class="desc">Variable Docker utilisée dans ton override.</span></div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="note">
+    <b>Rappel :</b> les commandes précédées d’un point sont à saisir directement dans le chat WoW. Certaines commandes de diagnostic / administration peuvent nécessiter un niveau GM.
+  </div>
+  <div class="small">Cheat sheet — serveur AzerothCore 3.3.5a Playerbot branch — mod-server-customization v2.1</div>
+</div>
+
+<script>
+const q = document.getElementById('q');
+q.addEventListener('input', () => {
+  const s = q.value.toLowerCase().trim();
+  document.querySelectorAll('.card').forEach(card => {
+    card.classList.toggle('hidden', s && !card.innerText.toLowerCase().includes(s));
+  });
+});
+</script>
+</body>
+</html>

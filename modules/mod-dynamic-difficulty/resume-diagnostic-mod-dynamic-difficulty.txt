@@ -1,0 +1,54 @@
+Résumé diagnostic — mod-dynamic-difficulty
+
+Contexte
+- Module : mod-dynamic-difficulty
+- Commande .gamedifficulty fonctionne en jeu.
+- Le fichier de config actif est bien présent et chargé.
+- Le module est bien compilé dans le worldserver.
+- Exemple de config testée en extérieur sans bots :
+  DynamicDifficulty.Outdoor.WithoutBots.Damage.Min = 1.00
+  DynamicDifficulty.Outdoor.WithoutBots.Damage.Max = 1.70
+
+Ce qui a été vérifié
+1. Le hook ModifyMeleeDamage se déclenche bien.
+2. En debug, le module calcule correctement le multiplicateur.
+3. Exemple observé en jeu :
+   [DD DEBUG] MELEE mob=15274 area=Outdoor bots=0 diff=100 raw=2 x1.700 => 3
+4. Donc :
+   - contexte Outdoor correctement détecté
+   - bots=0 correctement détecté
+   - difficulté 100 correctement lue
+   - multiplicateur x1.700 correctement calculé
+   - valeur intermédiaire modifiée de 2 à 3
+
+Problème observé
+- Malgré le debug qui montre raw=2 => final=3 dans ModifyMeleeDamage,
+  le personnage ne perd réellement que 2 PV.
+- Les dégâts flottants affichés à l'écran restent également à -2.
+- Donc la valeur modifiée dans ModifyMeleeDamage n'est pas la valeur finale
+  effectivement appliquée aux PV dans ce chemin de dégâts.
+
+Autre tentative
+- Une version utilisant UnitScript::DealDamage a été testée.
+- Cette tentative n'a pas corrigé le problème.
+- On sait que ScriptMgr::DealDamage existe côté AzerothCore, mais on n'a pas
+  encore confirmé que ce hook est effectivement appelé dans le chemin réel
+  de Unit::DealDamage utilisé ici pour les attaques concernées.
+
+Conclusion actuelle
+- Le problème ne vient pas de la config ni du calcul du multiplicateur.
+- Le problème est lié au point d'injection choisi dans le pipeline de dégâts.
+- ModifyMeleeDamage modifie bien une valeur intermédiaire, mais pas la valeur
+  finalement soustraite aux PV dans ce cas.
+- Il faudra reprendre plus tard le vrai chemin de Unit::DealDamage dans le fork
+  utilisé et identifier l'endroit exact juste avant la perte de PV réelle.
+- Une solution robuste pourrait être :
+  - trouver un hook existant réellement appelé à cet endroit, ou
+  - ajouter un petit patch core dédié, appliqué automatiquement au rebuild,
+    qui appelle ensuite la logique du module de difficulté.
+
+Notes annexes
+- Le debug chat fonctionne avec le formatage {} de PSendSysMessage.
+- DynamicDifficulty.Debug = 1 permet d'afficher les valeurs intermédiaires.
+- Le script de rebuild actuel restaure les anciens .conf mais ne fusionne pas
+  automatiquement les nouvelles clés ajoutées dans les .conf.dist.

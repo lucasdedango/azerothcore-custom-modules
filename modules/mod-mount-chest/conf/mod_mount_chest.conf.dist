@@ -1,0 +1,19 @@
+#
+# mod-mount-chest V2
+#
+# Chests only roll on XP-eligible creature kills in the open world.
+# Dungeons and raids are excluded.
+#
+# Exact independent per-kill probabilities are implemented with one uniform
+# random roll from 1 to 10000, using mutually exclusive ranges:
+#   Common copper chest : 1000 / 10000 = 10%   (1 in 10)
+#   Silver chest        :  100 / 10000 = 1%    (1 in 100)
+#   Mount chest         :   10 / 10000 = 0.1%  (1 in 1000)
+#   Nothing             : 8890 / 10000 = 88.9%
+#
+
+MountChest.Enable = 1
+MountChest.OwnerOnly = 1
+MountChest.LifetimeSeconds = 120
+MountChest.MoneyMin = 10
+MountChest.MoneyMax = 50
