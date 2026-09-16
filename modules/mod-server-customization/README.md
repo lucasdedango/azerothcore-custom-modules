@@ -1,4 +1,4 @@
-# mod-server-customization v1.8.0
+# mod-server-customization v2.4.1
 
 Module maison pour les personnalisations globales du serveur et l'automatisation joueur contrôlée.
 
@@ -205,3 +205,46 @@ The gather commands now accept an optional `noloot` argument:
 Combat/self-defense is unchanged. When a creature dies on the way, its corpse is removed from Playerbots' available-loot queue. Mining/herbalism GameObject loot remains enabled.
 
 Running the commands without `noloot` preserves normal loot behavior.
+
+## v2.4 — XP individuelle et gains de métiers
+
+`mod-server-customization` fournit désormais directement les commandes `.xp` qui étaient auparavant
+assurées par `mod-individual-xp` :
+
+```text
+.xp view
+.xp set 1
+.xp set 3
+.xp default
+.xp enable
+.xp disable
+```
+
+Le multiplicateur est sauvegardé par personnage dans la table `server_customization_character_rates`. La migration y copie d’abord les anciennes valeurs `individualxp`. Cette table historique est conservée comme sauvegarde, mais le module ne la lit plus : les réglages des personnages sont préservés sans dépendance d’exécution à l’ancien module. Les bornes
+et la valeur par défaut sont configurables :
+
+```ini
+ServerCustomization.XP.Enable = 1
+ServerCustomization.XP.AnnounceOnLogin = 1
+ServerCustomization.XP.DefaultRate = 1
+ServerCustomization.XP.MaxRate = 3
+```
+
+Les points gagnés lors d'un skill-up de récolte de plante/minerai ou d'un craft sont également
+gérés par personnage. Les chances orange/jaune/verte/grise natives restent inchangées ; ces
+commandes choisissent entre 1 et 3 points accordés lorsque le skill-up réussit :
+
+```text
+.profession view
+.profession gathering 1
+.profession crafting 3
+.profession default
+```
+
+Les valeurs initiales et celles restaurées par `.profession default` sont configurables :
+
+```ini
+ServerCustomization.Profession.Enable = 1
+ServerCustomization.Profession.DefaultGatheringSkillGain = 1
+ServerCustomization.Profession.DefaultCraftingSkillGain = 3
+```

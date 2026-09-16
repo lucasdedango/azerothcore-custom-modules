@@ -26,7 +26,6 @@ Chaque module doit garder son `conf/*.conf.dist` à jour et documenter toute nou
 Ces modules ne sont pas développés dans ce repo, mais doivent être listés ici pour garder une vue complète de l'installation :
 
 - `mod-playerbots`
-- `mod-individual-xp`
 - `mod-individual-progression`
 - `mod-aoe-loot`
 - `mod-autobalance`
@@ -75,6 +74,7 @@ Commandes custom actuellement importantes :
 - `.autostatus` / `.as`
 - `.autostop` / `.astop`
 - `.damagedebug`
+- `.profession view` / `.profession gathering 1..3` / `.profession crafting 1..3` / `.profession default`
 
 ## Style de travail
 
