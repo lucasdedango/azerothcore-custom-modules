@@ -200,3 +200,20 @@ ServerCustomization.Automation.Rest.ManaResumePct = 85
 # and only while one of our automation modes is active.
 ServerCustomization.Automation.DisableFallDamage = 1
 ServerCustomization.Automation.FallDamageGraceMs = 5000
+
+###################################################################################################
+# XP INDIVIDUELLE ET GAINS DE METIERS
+###################################################################################################
+
+# Remplace mod-individual-xp. Chaque personnage peut choisir son multiplicateur avec .xp.
+ServerCustomization.XP.Enable = 1
+ServerCustomization.XP.AnnounceOnLogin = 1
+ServerCustomization.XP.DefaultRate = 1
+ServerCustomization.XP.MaxRate = 3
+
+# Chaque personnage choisit ses gains (1 à 3) avec la commande .profession.
+# Les valeurs ci-dessous sont appliquées par défaut et restaurées par .profession default.
+# La récolte ne concerne que Herbalism et Mining (pas Skinning/Fishing).
+ServerCustomization.Profession.Enable = 1
+ServerCustomization.Profession.DefaultGatheringSkillGain = 1
+ServerCustomization.Profession.DefaultCraftingSkillGain = 3

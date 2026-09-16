@@ -5,6 +5,7 @@
 #include "Creature.h"
 #include "Config.h"
 #include "DBCStores.h"
+#include "DatabaseEnv.h"
 #include "GameObject.h"
 #include "GameObjectData.h"
 #include "GridNotifiers.h"
@@ -48,6 +49,14 @@ namespace ServerCustomization
         bool ActionBarEnable = true;
         uint8 PreferredSlot = 11;
         bool AnnounceGrant = true;
+
+        bool XpRateEnable = true;
+        bool XpRateAnnounceOnLogin = true;
+        float XpRateDefault = 1.0f;
+        float XpRateMaximum = 3.0f;
+        bool ProfessionGainEnable = true;
+        uint32 GatheringSkillGainDefault = 1;
+        uint32 CraftingSkillGainDefault = 3;
 
         uint32 Human = 458;
         uint32 Orc = 6654;
@@ -99,6 +108,67 @@ namespace ServerCustomization
     };
 
     Config g_Config;
+
+    inline constexpr char CharacterRatesDataKey[] = "ServerCustomization.CharacterRates";
+
+    class CharacterRatesState : public DataMap::Base
+    {
+    public:
+        float xpRate = 1.0f;
+        uint32 gatheringSkillGain = 1;
+        uint32 craftingSkillGain = 3;
+    };
+
+    static float ClampXpRate(float rate)
+    {
+        return std::clamp(rate, 1.0f, std::max(1.0f, g_Config.XpRateMaximum));
+    }
+
+    static CharacterRatesState* GetCharacterRates(Player* player)
+    {
+        return player ? player->CustomData.GetDefault<CharacterRatesState>(CharacterRatesDataKey) : nullptr;
+    }
+
+    static void SaveCharacterRates(Player* player)
+    {
+        if (!player)
+            return;
+
+        if (CharacterRatesState* state = player->CustomData.Get<CharacterRatesState>(CharacterRatesDataKey))
+        {
+            CharacterDatabase.DirectExecute(
+                "REPLACE INTO `server_customization_character_rates` "
+                "(`CharacterGUID`, `XPRate`, `GatheringSkillGain`, `CraftingSkillGain`) VALUES ({}, {}, {}, {})",
+                player->GetGUID().GetCounter(), state->xpRate, state->gatheringSkillGain, state->craftingSkillGain);
+        }
+    }
+
+    static void SendXpStatus(ChatHandler* handler, Player* player)
+    {
+        if (!handler || !player)
+            return;
+
+        if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN))
+        {
+            handler->SendSysMessage("|cffffff00[XP]|r Gain d'experience desactive. Utilisez .xp enable pour le reactiver.");
+            return;
+        }
+
+        std::ostringstream message;
+        message << "|cffffff00[XP]|r Multiplicateur actuel : x" << GetCharacterRates(player)->xpRate
+                << " (maximum x" << g_Config.XpRateMaximum << ").";
+        handler->SendSysMessage(message.str().c_str());
+    }
+
+    static void SendProfessionStatus(ChatHandler* handler, Player* player)
+    {
+        if (!handler || !player)
+            return;
+
+        CharacterRatesState* state = GetCharacterRates(player);
+        handler->PSendSysMessage("|cffffff00[Metiers]|r Recolte minerai/plantes : %u point(s) ; craft : %u point(s).",
+                                 state->gatheringSkillGain, state->craftingSkillGain);
+    }
 
     inline constexpr char DamageDebugDataKey[] = "ServerCustomization.DamageDebug";
 
@@ -360,6 +430,14 @@ namespace ServerCustomization
             g_Config.ActionBarEnable = sConfigMgr->GetOption<bool>("ServerCustomization.Starter.MountActionBar.Enable", true);
             g_Config.PreferredSlot = uint8(sConfigMgr->GetOption<uint32>("ServerCustomization.Starter.MountActionBar.PreferredSlot", 11));
             g_Config.AnnounceGrant = sConfigMgr->GetOption<bool>("ServerCustomization.Starter.AnnounceGrant", true);
+
+            g_Config.XpRateEnable = sConfigMgr->GetOption<bool>("ServerCustomization.XP.Enable", true);
+            g_Config.XpRateAnnounceOnLogin = sConfigMgr->GetOption<bool>("ServerCustomization.XP.AnnounceOnLogin", true);
+            g_Config.XpRateMaximum = std::max(1.0f, sConfigMgr->GetOption<float>("ServerCustomization.XP.MaxRate", 3.0f));
+            g_Config.XpRateDefault = ClampXpRate(sConfigMgr->GetOption<float>("ServerCustomization.XP.DefaultRate", 1.0f));
+            g_Config.ProfessionGainEnable = sConfigMgr->GetOption<bool>("ServerCustomization.Profession.Enable", true);
+            g_Config.GatheringSkillGainDefault = std::clamp(sConfigMgr->GetOption<uint32>("ServerCustomization.Profession.DefaultGatheringSkillGain", 1), 1u, 3u);
+            g_Config.CraftingSkillGainDefault = std::clamp(sConfigMgr->GetOption<uint32>("ServerCustomization.Profession.DefaultCraftingSkillGain", 3), 1u, 3u);
 
             g_Config.Human = sConfigMgr->GetOption<uint32>("ServerCustomization.Starter.Mount.Human", 458);
             g_Config.Orc = sConfigMgr->GetOption<uint32>("ServerCustomization.Starter.Mount.Orc", 6654);
@@ -1589,6 +1667,186 @@ namespace ServerCustomization
         }
     };
 
+    class XpCommandScript : public CommandScript
+    {
+    public:
+        XpCommandScript() : CommandScript("ServerCustomizationXpCommands") {}
+
+        ChatCommandTable GetCommands() const override
+        {
+            static ChatCommandTable xpCommands =
+            {
+                { "enable",  HandleEnable,  SEC_PLAYER, Console::No },
+                { "disable", HandleDisable, SEC_PLAYER, Console::No },
+                { "view",    HandleView,    SEC_PLAYER, Console::No },
+                { "set",     HandleSet,     SEC_PLAYER, Console::No },
+                { "default", HandleDefault, SEC_PLAYER, Console::No }
+            };
+            static ChatCommandTable root = { { "xp", xpCommands } };
+            return root;
+        }
+
+        static bool IsAvailable(ChatHandler* handler)
+        {
+            if (g_Config.XpRateEnable)
+                return true;
+
+            handler->SendSysMessage("|cffff4444[XP]|r La personnalisation d'experience est desactivee sur ce serveur.");
+            return false;
+        }
+
+        static bool HandleView(ChatHandler* handler)
+        {
+            if (!IsAvailable(handler))
+                return false;
+
+            SendXpStatus(handler, handler->GetPlayer());
+            return true;
+        }
+
+        static bool HandleSet(ChatHandler* handler, float rate)
+        {
+            if (!IsAvailable(handler))
+                return false;
+
+            Player* player = handler->GetPlayer();
+            if (!player || !std::isfinite(rate) || rate < 1.0f || rate > g_Config.XpRateMaximum)
+            {
+                handler->PSendSysMessage("|cffff4444Syntaxe :|r .xp set X (X entre 1 et %.2f)", g_Config.XpRateMaximum);
+                return false;
+            }
+
+            GetCharacterRates(player)->xpRate = rate;
+            SaveCharacterRates(player);
+            SendXpStatus(handler, player);
+            return true;
+        }
+
+        static bool HandleDefault(ChatHandler* handler)
+        {
+            if (!IsAvailable(handler))
+                return false;
+
+            Player* player = handler->GetPlayer();
+            if (!player)
+                return false;
+
+            GetCharacterRates(player)->xpRate = g_Config.XpRateDefault;
+            SaveCharacterRates(player);
+            SendXpStatus(handler, player);
+            return true;
+        }
+
+        static bool HandleDisable(ChatHandler* handler)
+        {
+            if (!IsAvailable(handler))
+                return false;
+
+            Player* player = handler->GetPlayer();
+            if (!player)
+                return false;
+
+            player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
+            handler->SendSysMessage("|cffffff00[XP]|r Gain d'experience desactive.");
+            return true;
+        }
+
+        static bool HandleEnable(ChatHandler* handler)
+        {
+            if (!IsAvailable(handler))
+                return false;
+
+            Player* player = handler->GetPlayer();
+            if (!player)
+                return false;
+
+            player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
+            handler->SendSysMessage("|cff00ff00[XP]|r Gain d'experience reactive.");
+            SendXpStatus(handler, player);
+            return true;
+        }
+    };
+
+    class ProfessionCommandScript : public CommandScript
+    {
+    public:
+        ProfessionCommandScript() : CommandScript("ServerCustomizationProfessionCommands") {}
+
+        ChatCommandTable GetCommands() const override
+        {
+            static ChatCommandTable professionCommands =
+            {
+                { "gathering", HandleGathering, SEC_PLAYER, Console::No },
+                { "crafting",  HandleCrafting,  SEC_PLAYER, Console::No },
+                { "view",      HandleView,      SEC_PLAYER, Console::No },
+                { "default",   HandleDefault,   SEC_PLAYER, Console::No }
+            };
+            static ChatCommandTable root = { { "profession", professionCommands } };
+            return root;
+        }
+
+        static bool IsAvailable(ChatHandler* handler)
+        {
+            if (g_Config.ProfessionGainEnable)
+                return true;
+
+            handler->SendSysMessage("|cffff4444[Metiers]|r La personnalisation des gains est desactivee sur ce serveur.");
+            return false;
+        }
+
+        static bool SetGain(ChatHandler* handler, uint32 gain, bool gathering)
+        {
+            if (!IsAvailable(handler))
+                return false;
+
+            Player* player = handler->GetPlayer();
+            if (!player || gain < 1 || gain > 3)
+            {
+                handler->SendSysMessage(gathering
+                    ? "|cffff4444Syntaxe :|r .profession gathering X (X entre 1 et 3)"
+                    : "|cffff4444Syntaxe :|r .profession crafting X (X entre 1 et 3)");
+                return false;
+            }
+
+            CharacterRatesState* state = GetCharacterRates(player);
+            if (gathering)
+                state->gatheringSkillGain = gain;
+            else
+                state->craftingSkillGain = gain;
+            SaveCharacterRates(player);
+            SendProfessionStatus(handler, player);
+            return true;
+        }
+
+        static bool HandleGathering(ChatHandler* handler, uint32 gain) { return SetGain(handler, gain, true); }
+        static bool HandleCrafting(ChatHandler* handler, uint32 gain) { return SetGain(handler, gain, false); }
+
+        static bool HandleView(ChatHandler* handler)
+        {
+            if (!IsAvailable(handler))
+                return false;
+            SendProfessionStatus(handler, handler->GetPlayer());
+            return true;
+        }
+
+        static bool HandleDefault(ChatHandler* handler)
+        {
+            if (!IsAvailable(handler))
+                return false;
+
+            Player* player = handler->GetPlayer();
+            if (!player)
+                return false;
+
+            CharacterRatesState* state = GetCharacterRates(player);
+            state->gatheringSkillGain = g_Config.GatheringSkillGainDefault;
+            state->craftingSkillGain = g_Config.CraftingSkillGainDefault;
+            SaveCharacterRates(player);
+            SendProfessionStatus(handler, player);
+            return true;
+        }
+    };
+
     class DamageDebugUnitScript : public UnitScript
     {
     public:
@@ -1645,7 +1903,11 @@ namespace ServerCustomization
     class PlayerScriptImpl : public PlayerScript
     {
     public:
-        PlayerScriptImpl() : PlayerScript("ServerCustomizationPlayerScript", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_UPDATE }) {}
+        PlayerScriptImpl()
+            : PlayerScript("ServerCustomizationPlayerScript",
+                           { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE,
+                             PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL,
+                             PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL }) {}
 
         void OnPlayerUpdate(Player* player, uint32 diff) override
         {
@@ -1656,6 +1918,50 @@ namespace ServerCustomization
         void OnPlayerLogin(Player* player) override
         {
             EnsureStarterRidingAndMount(player, true);
+
+            CharacterRatesState* state = GetCharacterRates(player);
+            state->xpRate = g_Config.XpRateDefault;
+            state->gatheringSkillGain = g_Config.GatheringSkillGainDefault;
+            state->craftingSkillGain = g_Config.CraftingSkillGainDefault;
+            if (QueryResult result = CharacterDatabase.Query(
+                    "SELECT `XPRate`, `GatheringSkillGain`, `CraftingSkillGain` "
+                    "FROM `server_customization_character_rates` WHERE `CharacterGUID` = {}",
+                    player->GetGUID().GetCounter()))
+            {
+                Field* fields = result->Fetch();
+                state->xpRate = ClampXpRate(fields[0].Get<float>());
+                state->gatheringSkillGain = std::clamp(fields[1].Get<uint32>(), 1u, 3u);
+                state->craftingSkillGain = std::clamp(fields[2].Get<uint32>(), 1u, 3u);
+            }
+
+            if (g_Config.XpRateEnable && g_Config.XpRateAnnounceOnLogin && player->GetSession())
+            {
+                ChatHandler handler(player->GetSession());
+                SendXpStatus(&handler, player);
+            }
+        }
+
+        void OnPlayerLogout(Player* player) override
+        {
+            SaveCharacterRates(player);
+        }
+
+        void OnPlayerGiveXP(Player* player, uint32& amount, Unit*, uint8) override
+        {
+            if (g_Config.XpRateEnable)
+                amount = uint32(std::round(float(amount) * GetCharacterRates(player)->xpRate));
+        }
+
+        void OnPlayerUpdateGatheringSkill(Player* player, uint32 skillId, uint32, uint32, uint32, uint32, uint32& gain) override
+        {
+            if (g_Config.ProfessionGainEnable && (skillId == SKILL_HERBALISM || skillId == SKILL_MINING))
+                gain = GetCharacterRates(player)->gatheringSkillGain;
+        }
+
+        void OnPlayerUpdateCraftingSkill(Player* player, SkillLineAbilityEntry const*, uint32, uint32& gain) override
+        {
+            if (g_Config.ProfessionGainEnable)
+                gain = GetCharacterRates(player)->craftingSkillGain;
         }
     };
 }
@@ -1666,4 +1972,6 @@ void AddServerCustomizationScripts()
     new ServerCustomization::PlayerScriptImpl();
     new ServerCustomization::DamageDebugUnitScript();
     new ServerCustomization::AutomationCommandScript();
+    new ServerCustomization::XpCommandScript();
+    new ServerCustomization::ProfessionCommandScript();
 }
