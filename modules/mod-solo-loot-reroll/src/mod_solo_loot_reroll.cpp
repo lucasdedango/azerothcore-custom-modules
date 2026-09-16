@@ -1241,7 +1241,7 @@ public:
         if (value.empty() || value == "status")
         {
             handler->PSendSysMessage(
-                "SmartLoot selection: %s.",
+                "SmartLoot selection: {}.",
                 IsLootIgnored(player)
                     ? "IGNORED - vous ne serez pas choisi comme cible de substitution"
                     : "ELIGIBLE - vous pouvez etre choisi comme cible de substitution");
@@ -1311,14 +1311,14 @@ public:
             if (!record)
             {
                 handler->PSendSysMessage(
-                    "SmartLoot #%u introuvable (mauvais personnage, historique expire ou redemarrage serveur).",
+                    "SmartLoot #{} introuvable (mauvais personnage, historique expire ou redemarrage serveur).",
                     id);
                 return false;
             }
 
             if (record->Undone)
             {
-                handler->PSendSysMessage("SmartLoot #%u a deja ete annule.", id);
+                handler->PSendSysMessage("SmartLoot #{} a deja ete annule.", id);
                 return false;
             }
 
@@ -1387,7 +1387,7 @@ public:
             player->StoreNewItemInBestSlots(snapshot.SubstituteItemId, 1);
 
             handler->PSendSysMessage(
-                "Echec inattendu de SmartLoot #%u: substitution restauree, aucune perte volontaire.",
+                "Echec inattendu de SmartLoot #{}: substitution restauree, aucune perte volontaire.",
                 id);
             return false;
         }
@@ -1460,7 +1460,7 @@ public:
         handler->SendSysMessage(counts.c_str());
 
         handler->PSendSysMessage(
-            "Your SmartLoot selection state: %s.",
+            "Your SmartLoot selection state: {}.",
             IsLootIgnored(player) ? "IGNORED" : "ELIGIBLE");
 
         handler->SendSysMessage(

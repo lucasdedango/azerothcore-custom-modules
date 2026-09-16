@@ -283,11 +283,11 @@ static void SendStatus(ChatHandler* handler, Player* player)
     ContextRanges const& ranges = GetRanges(area, group.HasBots);
 
     handler->PSendSysMessage(
-        "|cff00ff96[DynamicDifficulty]|r Personal: %u%%. Effective group: %u%%.",
+        "|cff00ff96[DynamicDifficulty]|r Personal: {}%. Effective group: {}%.",
         static_cast<uint32>(personal), static_cast<uint32>(effective));
 
     handler->PSendSysMessage(
-        "Context: %s / %s bots. Damage x%.3f, spell damage x%.3f before creature-rank modifier.",
+        "Context: {} / {} bots. Damage x{:.3f}, spell damage x{:.3f} before creature-rank modifier.",
         AreaName(area), group.HasBots ? "with" : "without",
         Interpolate(ranges.Damage, effective),
         Interpolate(ranges.SpellDamage, effective));
@@ -349,7 +349,7 @@ public:
 
         if (g_Config.Enable && g_Config.AnnounceOnLogin)
             ChatHandler(player->GetSession()).PSendSysMessage(
-                "|cff00ff96[DynamicDifficulty]|r Loaded: %u%%. Use .gamedifficulty for status.",
+                "|cff00ff96[DynamicDifficulty]|r Loaded: {}%. Use .gamedifficulty for status.",
                 static_cast<uint32>(value));
     }
 
@@ -460,7 +460,7 @@ public:
             SetPlayerDifficulty(player, g_Config.DefaultDifficulty);
             SaveDifficulty(player);
             handler->PSendSysMessage(
-                "|cff00ff96[DynamicDifficulty]|r Reset to %u%% and saved.",
+                "|cff00ff96[DynamicDifficulty]|r Reset to {}% and saved.",
                 static_cast<uint32>(g_Config.DefaultDifficulty));
             SendStatus(handler, player);
             return true;
@@ -478,7 +478,7 @@ public:
         SetPlayerDifficulty(player, static_cast<uint8>(parsed));
         SaveDifficulty(player);
         handler->PSendSysMessage(
-            "|cff00ff96[DynamicDifficulty]|r Set to %ld%% and saved in SQL.", parsed);
+            "|cff00ff96[DynamicDifficulty]|r Set to {}% and saved in SQL.", parsed);
         SendStatus(handler, player);
         return true;
     }

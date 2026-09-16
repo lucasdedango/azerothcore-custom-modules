@@ -26,7 +26,6 @@ Chaque module doit garder son `conf/*.conf.dist` à jour et documenter toute nou
 Ces modules ne sont pas développés dans ce repo, mais doivent être listés ici pour garder une vue complète de l'installation :
 
 - `mod-playerbots`
-- `mod-individual-xp`
 - `mod-individual-progression`
 - `mod-aoe-loot`
 - `mod-autobalance`
@@ -75,12 +74,18 @@ Commandes custom actuellement importantes :
 - `.autostatus` / `.as`
 - `.autostop` / `.astop`
 - `.damagedebug`
+- `.profession view` / `.profession gathering 1..3` / `.profession crafting 1..3` / `.profession default`
 
 ## Style de travail
 
 Faire des changements ciblés et faciles à relire.
 
 Avant de modifier une API AzerothCore ou Playerbots, vérifier l'API actuelle dans le code source upstream.
+
+Les messages paramétrés envoyés avec `ChatHandler::PSendSysMessage` utilisent la syntaxe
+`fmt` d'AzerothCore (`{}`, `{:.2f}`, etc.), jamais les marqueurs `printf` (`%u`, `%s`,
+`%.2f`, etc.). Lors d'une modification de messages joueur, contrôler tous les modules
+custom pour éviter que les marqueurs soient affichés littéralement en jeu.
 
 Pour un bug :
 1. identifier la cause ;

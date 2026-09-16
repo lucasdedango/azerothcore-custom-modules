@@ -46,6 +46,5 @@ services:
       AC_RATE_REST_OFFLINE_IN_TAVERN_OR_CITY: "3" # Rate.Rest.Offline.InTavernOrCity
       AC_RATE_REST_OFFLINE_IN_WILDERNESS: "5" # Rate.Rest.Offline.InWilderness
       AC_RATE_REST_MAX_BONUS: "3.0" # Rate.Rest.MaxBonus
-      AC_SKILL_GAIN_CRAFTING: "3" # SkillGain.Crafting
     volumes: 
       - ./modules:/azerothcore/modules:ro
