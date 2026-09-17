@@ -327,6 +327,29 @@ $targetedLoopBlock = @'
         // .grindtarget: attackers were handled above, but voluntary grind targets must
         // match the selected creature entry. If none are nearby, return no grind target
         // instead of attacking unrelated mobs.
+        bool configuredGrindTarget = false;
+        if (auto* gatherState = bot->CustomData.Get<ServerCustomizationGatherOnly::State>(ServerCustomizationGatherOnly::DataKey))
+        {
+            if (gatherState->mode == ServerCustomizationGatherOnly::Mode::Grind && gatherState->grindCreatureEntry != 0)
+            {
+                configuredGrindTarget = unit->GetEntry() == gatherState->grindCreatureEntry;
+                if (!configuredGrindTarget)
+                    continue;
+            }
+        }
+
+'@
+
+$v25TargetedLoopBlock = @'
+    for (ObjectGuid const guid : targets)
+    {
+        Unit* unit = botAI->GetUnit(guid);
+        if (!unit)
+            continue;
+
+        // .grindtarget: attackers were handled above, but voluntary grind targets must
+        // match the selected creature entry. If none are nearby, return no grind target
+        // instead of attacking unrelated mobs.
         if (auto* gatherState = bot->CustomData.Get<ServerCustomizationGatherOnly::State>(ServerCustomizationGatherOnly::DataKey))
         {
             if (gatherState->mode == ServerCustomizationGatherOnly::Mode::Grind &&
@@ -337,7 +360,11 @@ $targetedLoopBlock = @'
 
 '@
 
-if ($grind.Contains($targetLoopAnchor)) {
+if ($grind.Contains($v25TargetedLoopBlock)) {
+    $grind = $grind.Replace($v25TargetedLoopBlock, $targetedLoopBlock)
+    Write-Host "Upgraded .grindtarget creature-entry filter to allow explicitly selected grey mobs." -ForegroundColor Green
+}
+elseif ($grind.Contains($targetLoopAnchor)) {
     $grind = $grind.Replace($targetLoopAnchor, $targetedLoopBlock)
     Write-Host "Applied .grindtarget creature-entry filter." -ForegroundColor Green
 }
@@ -346,6 +373,30 @@ elseif ($grind.Contains($targetedLoopBlock)) {
 }
 else {
     throw "Expected GrindTargetValue target loop not found. Patch aborted."
+}
+
+$nativeXpTargetCheck = @'
+        if (!bot->isHonorOrXPTarget(unit))
+            continue;
+'@
+
+$configuredXpTargetCheck = @'
+        // A creature explicitly chosen with .grindtarget may be grey to the player.
+        // Keep native XP/honor suitability for normal grind, but do not silently reject
+        // the requested entry solely because it no longer grants experience.
+        if (!configuredGrindTarget && !bot->isHonorOrXPTarget(unit))
+            continue;
+'@
+
+if ($grind.Contains($nativeXpTargetCheck)) {
+    $grind = $grind.Replace($nativeXpTargetCheck, $configuredXpTargetCheck)
+    Write-Host "Applied .grindtarget grey-creature selection override." -ForegroundColor Green
+}
+elseif ($grind.Contains($configuredXpTargetCheck)) {
+    Write-Host ".grindtarget grey-creature selection override is already current."
+}
+else {
+    throw "Expected GrindTargetValue XP/honor target check not found. Patch aborted."
 }
 
 $nativeDistanceBlock = @'

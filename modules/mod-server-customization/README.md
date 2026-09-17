@@ -256,3 +256,10 @@ ServerCustomization.Profession.DefaultCraftingSkillGain = 3
   et réinitialise les cibles `current target` et `pull target` de Playerbots.
 - Le trigger natif `no target` peut ainsi lancer `attack anything` au tick suivant ; le filtre
   custom continue ensuite de limiter les cibles volontaires à l'entry mémorisée.
+
+## v2.6 — `.grindtarget` accepte les créatures grises
+
+- Une créature hostile explicitement choisie avec `.grindtarget` reste maintenant une cible
+  valide même si son niveau est assez bas pour ne plus donner d'expérience.
+- Le grind normal conserve le filtre natif Playerbots et continue d'ignorer ces créatures.
+- Les véritables attackers gardent la priorité, comme auparavant.
