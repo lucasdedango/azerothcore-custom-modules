@@ -248,3 +248,11 @@ ServerCustomization.Profession.Enable = 1
 ServerCustomization.Profession.DefaultGatheringSkillGain = 1
 ServerCustomization.Profession.DefaultCraftingSkillGain = 3
 ```
+
+## v2.5 — démarrage fiable de `.grindtarget`
+
+- `.grindtarget` refuse désormais une sélection qui n'est pas une créature hostile vivante.
+- Après avoir mémorisé l'entry, la commande désélectionne le mob utilisé pour la configuration
+  et réinitialise les cibles `current target` et `pull target` de Playerbots.
+- Le trigger natif `no target` peut ainsi lancer `attack anything` au tick suivant ; le filtre
+  custom continue ensuite de limiter les cibles volontaires à l'entry mémorisée.
