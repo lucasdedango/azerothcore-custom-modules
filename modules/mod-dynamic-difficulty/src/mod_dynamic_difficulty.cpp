@@ -183,31 +183,6 @@ static char const* AreaName(AreaKind area)
     return "Outdoor";
 }
 
-static void SendDamageDebugToPlayer(
-    Player* victim,
-    char const* kind,
-    uint32 creatureEntry,
-    AreaKind area,
-    GroupContext const& group,
-    int64 before,
-    float multiplier,
-    int64 after)
-{
-    if (!g_Config.Debug || !victim || !victim->GetSession() || IsBot(victim))
-        return;
-
-    ChatHandler(victim->GetSession()).PSendSysMessage(
-        "|cffffcc00[DD DEBUG]|r {} mob={} area={} bots={} diff={} raw={} x{:.3f} => {}",
-        kind,
-        creatureEntry,
-        AreaName(area),
-        group.HasBots ? 1u : 0u,
-        static_cast<uint32>(group.Difficulty),
-        before,
-        multiplier,
-        after);
-}
-
 static float RankExtra(Creature const* creature)
 {
     if (!creature || !creature->GetCreatureTemplate())
@@ -251,16 +226,6 @@ static uint32 ScaleDamage(uint32 damage, float multiplier)
     if (v <= 0.0) return 0;
     if (v >= static_cast<double>(UINT32_MAX)) return UINT32_MAX;
     return static_cast<uint32>(v);
-}
-
-static int32 ScaleDamage(int32 damage, float multiplier)
-{
-    if (damage <= 0 || multiplier == 1.0f)
-        return damage;
-    double v = std::round(static_cast<double>(damage) * multiplier);
-    if (v <= 0.0) return 0;
-    if (v >= static_cast<double>(INT32_MAX)) return INT32_MAX;
-    return static_cast<int32>(v);
 }
 
 static void SaveDifficulty(Player* player)
