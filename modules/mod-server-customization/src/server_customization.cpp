@@ -1452,13 +1452,26 @@ namespace ServerCustomization
 
         Unit* selected = handler->getSelectedUnit();
         Creature* creature = selected ? selected->ToCreature() : nullptr;
-        if (!creature)
+        if (!creature || !creature->IsAlive() || !player->IsHostileTo(creature))
         {
-            handler->SendSysMessage("|cffff4444Grind target:|r select a creature first.");
+            handler->SendSysMessage("|cffff4444Grind target:|r select a living hostile creature first.");
             return false;
         }
 
-        return StartGrind(handler, creature->GetEntry(), creature->GetName().c_str());
+        if (!StartGrind(handler, creature->GetEntry(), creature->GetName().c_str()))
+            return false;
+
+        // The selected creature is only the configuration input. Leaving it in
+        // Playerbots' current-target cache prevents the native "no target"
+        // trigger from running "attack anything" and selecting a grind target.
+        player->SetSelection(ObjectGuid::Empty);
+        if (PlayerbotAI* botAI = GET_PLAYERBOT_AI(player))
+        {
+            botAI->GetAiObjectContext()->GetValue<Unit*>("current target")->Set(nullptr);
+            botAI->GetAiObjectContext()->GetValue<ObjectGuid>("pull target")->Set(ObjectGuid::Empty);
+        }
+
+        return true;
     }
 
     static bool ParseGatherCommandOptions(ChatHandler* handler, std::string_view args, bool& suppressMobLoot)
@@ -1527,7 +1540,7 @@ namespace ServerCustomization
             handler->SendSysMessage("|cffffff00.herb [noloot]|r - herb nodes; noloot ignores creature corpses killed on the way");
             handler->SendSysMessage("|cffffff00.gather [noloot]|r - ore + herbs; noloot ignores creature corpses killed on the way");
             handler->SendSysMessage("|cffffff00.grind|r - normal grind of suitable nearby mobs");
-            handler->SendSysMessage("|cffffff00.grindtarget|r - focus voluntary grind on the currently selected creature type");
+            handler->SendSysMessage("|cffffff00.grindtarget|r - focus voluntary grind on the selected living hostile creature type");
             handler->SendSysMessage("|cffffff00.damagedebug on|r / |cffffff00off|r / |cffffff00status|r - trace incoming damage");
             handler->SendSysMessage("|cffffff00.autostatus|r / |cffffff00.as|r - show current automation mode");
             handler->SendSysMessage("|cffffff00.autostop|r / |cffffff00.astop|r - stop automation and detach selfbot AI");
